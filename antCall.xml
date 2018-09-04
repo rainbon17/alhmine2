@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project>
+<project name="NMIBuild" basedir="D:/temp" xmlns:a="antlib:ise.antelope.tasks">
+	<description>
+		cmd執行： ant -f antCall.xml -Dvol=sep3 build_ZIP＜target名稱＞
+
+	</description>
+	<!--日期 -->
+	<tstamp>
+		<format property="CURRENT_TIME" pattern="yyyy-MM-dd HH:mm:ss" />
+	</tstamp>
+	<property name="vol" value="9999" />
+	<property name="TEMP_PATH" value="D:/temp" />
+	<property name="WORKSPACE_PATH"   value="${TEMP_PATH}/trash"/>
+	<property name="PROJECT_PATH"     value="${basedir}"/>
+	
+	<target name="build_ZIP" depends="clean">
+		<zip destfile="./奈米投模擬投資撈取${vol}.zip" basedir="D:/temp/Sub_NMIann/${vol}"></zip>
+		<echo message="all done! (time:${CURRENT_TIME})"></echo>
+	</target>
+	
+	<!-- 清除先前檔案 -->
+	<target name="clean">
+		<delete file="D:/temp/奈米投模擬投資撈取${vol}.zip" />
+		<delete dir="${WORKSPACE_PATH}" /> 
+	</target>
+	
+	<!-- 測試準備 -->
+	<target name="print">
+		<mkdir dir="${TEMP_PATH}/trash" /> 
+		<echo message=" ### ${TEMP_PATH}" />
+		<touch file="${TEMP_PATH}/trash/.build_base_done"></touch>	
+		
+	</target>
+	
+	<!-- touch檔案清單 -->
+	<target name="touchFiles">
+		<loadfile property="filelist" srcfile="${TEMP_PATH}/list.txt"></loadfile>
+		<echo message="${filelist}"></echo>
+		<touch>
+			<filelist files="${filelist}" dir="${TEMP_PATH}"></filelist>
+		</touch>
+	</target>
+	
+	<!-- 拷貝ToDir(按時間) -->
+	<target name="cpToDir">
+		<touch file="${TEMP_PATH}/trash/.build_base_done"></touch>	
+		<touch file="${TEMP_PATH}/Sub_NMIann/123/a.txt"></touch>	
+		<touch file="${TEMP_PATH}/Sub_NMIann/123/b.txt"></touch>	
+		<touch file="${TEMP_PATH}/Sub_NMIann/123/c.txt"></touch>	
+		
+		<a:fileutil file="${TEMP_PATH}/trash/.build_base_done" property="build_base_done_ts">
+            <a:lastmodified format="yyyy-MM-dd HH:mm:ss"/>
+        </a:fileutil>
+        <echo>timestamp on ${TEMP_PATH}/trash/.build_base_done is ${build_base_done_ts}</echo>
+		<sleep seconds="2"/>
+		<copy todir="${TEMP_PATH}/trash" verbose="true">
+			<fileset dir="${TEMP_PATH}/Sub_NMIann" includes="**/*.*">
+				<date datetime="${build_base_done_ts}" pattern="yyyy-MM-dd HH:mm:ss" when="after"/>
+			</fileset>
+			<fileset dir="${TEMP_PATH}/Sub_NMIann">
+				<include name="**/*.sql"></include>
+			</fileset>
+		</copy>
+	</target>
+
+	<macrodef name="logstamp">
+		<sequential>
+			<local name="logtime" />
+			<tstamp>
+				<format property="logtime" pattern="yyyy.MM.dd : HH:mm:ss z" />
+			</tstamp>
+			<echo message=" ### Current time now: ${logtime}" />
+		</sequential>
+	</macrodef>
+
+	<!-- 每5秒 初始化呼叫method <logstamp>乙次-->
+	<target name="initEveryTime" description="boilerplate for all targets">
+		<!-- Just run the Macrodef -->
+		<logstamp />
+		<sleep seconds="5">
+		</sleep>
+		<logstamp />
+		<sleep seconds="5">
+		</sleep>
+		<logstamp />
+		<sleep seconds="5">
+		</sleep>
+		<logstamp />
+		<sleep seconds="5">
+		</sleep>
+		<logstamp />
+	</target>
+	
+	<target name="test">
+		<touch file="${TEMP_PATH}/.IBM_BIZ_before_compile"/>
+		<mkdir dir="${TEMP_PATH}/class/IBM_BIZ_COMPONENT" /> 
+	</target>
+
+</project>
